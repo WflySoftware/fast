@@ -1,0 +1,81 @@
+<ns1:MDIWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" 
+			   xmlns:ns1="flexmdi.containers.*" 
+			   layout="absolute" width="742" height="402"
+			   title="Pesquisa Rápida" creationComplete="createComplete(event)" xmlns:Validacao="Validacao.*">
+	<s:Panel y="10" height="168" title="Pesquisar Produto" fontSize="14" left="9" right="12">
+		
+		<s:Label x="10" y="49" text="Descrição:" id="label_descricao" />
+		<s:TextInput x="85" y="39" width="612" id="input_descricao" enabled="false" />
+		<s:Label x="10" y="81" text="Código:" id="label_codigo"/>
+		<s:TextInput x="85" y="71" width="612" id="input_codigo" enabled="false" />
+		
+		
+		<mx:Button y="103" label="Limpar" id="botao_limpar" click="limparCampos()" icon="@Embed('imagens/limpar.gif')" x="517"/>
+		<mx:Button x="604" y="103" label="Pesquisar" id="botao_salvar" icon="@Embed('imagens/save.gif')" click="pesquisarProduto(event)"/>
+		<s:CheckBox x="106" y="12" label="Descrição" id="chk_descricao" click="{input_descricao.enabled = true}"/>
+		<s:Label x="10" y="17" text="Pesquisa Por:"/>
+		<s:CheckBox x="195" y="12" label="Código" id="chk_codigo" click="{input_codigo.enabled = true}"/>
+		
+	</s:Panel>
+	<mx:DataGrid y="214" id="grid_produto" height="151" right="13" left="8">
+		<mx:columns>
+			<mx:DataGridColumn width="100" headerText="Codigo" dataField="codigo_personalizado" />
+			<mx:DataGridColumn width="400" headerText="Descricao" dataField="descricao"/>
+			<mx:DataGridColumn width="30" headerText="Qtd" dataField="quantidade"/>
+			<mx:DataGridColumn width="100" headerText="Preço de Venda" dataField="preco_venda"/>
+			<mx:DataGridColumn width="60" headerText="Lucro" dataField="margem_de_lucro"/>
+		</mx:columns>
+	</mx:DataGrid>
+	<fx:Script>
+		<![CDATA[
+			import Model.Produto;
+			
+			import br.connection.Server;
+			
+			import flashx.textLayout.operations.PasteOperation;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			private var ProdutoController:Server;
+			[Bindable]
+			private var produtoArray:ArrayCollection;
+			
+			
+			protected function createComplete(event:FlexEvent):void{
+				ProdutoController = new Server("ProdutoController");
+				produtoArray = new ArrayCollection();
+				grid_produto.dataProvider = produtoArray;
+			}
+			
+			
+			protected function pesquisarProduto(event:MouseEvent):void{
+				if((input_codigo.text = '') || (input_descricao.text = '')){
+					
+				}else if((input_descricao.text = '')){
+					ProdutoController.call("PesquisarPorCodigo",pesquisaResult,input_codigo.text);		
+				}else{
+					ProdutoController.call("PesquisarPorDescricao",pesquisaResult,input_descricao.text);
+				}
+			}
+			
+			protected function pesquisaResult(event:ResultEvent):void{
+				produtoArray.addItem(event.result);
+			}
+			
+			protected function limparCampos():void{
+				input_descricao.text = "";
+				input_codigo.text = "";
+			}
+		]]>
+	</fx:Script>	
+	
+	<fx:Declarations>
+		
+	</fx:Declarations>
+</ns1:MDIWindow>

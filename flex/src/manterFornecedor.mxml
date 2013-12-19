@@ -1,0 +1,279 @@
+<ns1:MDIWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" 
+			   xmlns:ns1="flexmdi.containers.*" 
+			   layout="absolute" width="742" height="466"
+			   title="Manter Fornecedor" creationComplete="createComplete(event)" xmlns:Validacao="Validacao.*">
+	<s:Panel y="10" height="255" title="Editar Fornecedor" fontSize="14" left="9" right="12">
+		
+		<s:Label x="10" y="32" text="ID:" fontSize="15" id="label_id"/>
+		<s:TextInput x="50" y="23" width="37" id="input_id" editable="false" />
+		
+		<s:Label x="91" y="32" text="Nome:" id="label_nome"/>
+		<s:TextInput x="140" y="23" width="567" id="input_nome"/>
+		
+		<s:Label x="10" y="69" text="Endereço:" id="label_endereco"/>
+		<s:TextInput x="82" y="59" width="336" id="input_endereco" />
+		
+		<s:Label x="426" y="69" text="Cidade:" id="label_cidade"/>
+		<s:TextInput x="479" y="59" width="135" id="input_cidade"/>
+		
+		<s:Label x="622" y="69" text="UF:" id="label_estado"/>
+		<s:ComboBox x="655" y="59" width="52" id="input_estado" labelField="sigla"/>
+		
+		<s:Label x="10" y="105" text="CNPJ:" id="label_cnpj"/>
+		<s:TextInput x="59" y="99" width="148" id="input_cnpj" restrict="0-9" maxChars="14" focusOut="fornecedorExiste()"/>
+		
+		<s:Label x="214" y="105" text="Telefone:" id="label_telefone"/>
+		<s:TextInput x="281" y="99" width="102" id="input_telefone" restrict="0-9" maxChars="10"/>
+		
+		<s:Label x="386" y="105" text="Email:" id="label_email"/>
+		<s:TextInput x="433" y="99" width="274" id="input_email"/>
+		
+		<s:Label x="10" y="139" text="Insc. Estadual:" id="label_inscricao"/>
+		<s:TextInput id="input_inscricao" x="111" y="129" width="161"/>
+		
+		<s:Label x="278" y="139" text="Razão:" id="label_razao"/>
+		<s:TextInput x="325" y="129" width="382" id="input_razao"/>
+		
+		<s:Label x="10" y="168" text="Representante:" id="label_representante"/>
+		<s:TextInput x="116" y="162" width="390" id="input_representante"/>
+		
+		<s:Label x="537" y="168" text="Celular:" id="label_celular"/>
+		<s:TextInput x="594" y="162" width="112" id="input_celular" restrict="0-9" maxChars="10" />
+		
+		<mx:Button y="194" label="Limpar" id="botao_limpar" click="limparCampos()" icon="@Embed('imagens/limpar.gif')" x="535"/>
+		<mx:Button x="622" y="194" label="Salvar" id="botao_salvar" icon="@Embed('imagens/save.gif')" click="salvarFornecedor(event)"/>
+		<mx:Button x="450" y="194" label="Excluir" id="botao_excluir" icon="@Embed('imagens/excluir.png')" click="excluirFornecedor(event)"/>
+	</s:Panel>
+	
+	<mx:DataGrid y="291" id="grid_fornecedor" height="136" right="11" left="10" change="fornecedorSelecionado(event)">
+		<mx:columns>
+			<mx:DataGridColumn width="250" headerText="Nome" dataField="id_fornecedor" />
+			<mx:DataGridColumn width="250" headerText="Representante" dataField="representante"/>
+			<mx:DataGridColumn width="100" headerText="Telefone" dataField="telefone"/>
+			<mx:DataGridColumn width="100" headerText="Celular" dataField="celular"/>
+		</mx:columns>
+	</mx:DataGrid>
+	
+	<fx:Script>
+		<![CDATA[
+			import Model.Fornecedor;
+			
+			import br.connection.Server;
+			
+			import flashx.textLayout.operations.PasteOperation;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			[Bindable]
+			private var FornecedorFormCadastro:Fornecedor;
+			private var FornecedorController:Server;
+			private var EstadoController:Server;
+			[Bindable]
+			private var fornecedorArray:ArrayCollection;
+			[Bindable]
+			private var estadoArray:ArrayCollection;
+			
+			
+			protected function createComplete(event:FlexEvent):void{
+				FornecedorFormCadastro	= new Fornecedor();
+				FornecedorController = new Server("FornecedorController");
+				EstadoController = new Server("EstadoController");
+				FornecedorController.call("ListarTodos",listarResult);
+				EstadoController.call("ListarTodos",listarEstadoResult);
+			}
+			
+			protected function listarResult(event:ResultEvent):void{
+				fornecedorArray = new ArrayCollection(event.result as Array);
+				grid_fornecedor.dataProvider = fornecedorArray;
+			}
+			
+			protected function listarEstadoResult(event:ResultEvent):void{
+				estadoArray = new ArrayCollection(event.result as Array);
+				input_estado.dataProvider = estadoArray;
+			}
+			
+			protected function salvarFornecedor(event:MouseEvent):void{
+				var ArrayValidators:Array = new Array();
+				ArrayValidators.push(nomeValidacao);
+				ArrayValidators.push(cnpjValidacao);
+				ArrayValidators.push(enderecoValidacao);
+				ArrayValidators.push(telefoneValidacao);
+				ArrayValidators.push(emailValidacao);
+				ArrayValidators.push(cidadeValidacao);
+				ArrayValidators.push(razaoValidacao);
+				ArrayValidators.push(inscricaoValidacao);
+				ArrayValidators.push(celularValidacao);
+				ArrayValidators.push(representanteValidacao);
+				
+				var ValidationOk : Boolean= Validator.validateAll(ArrayValidators).length == 0;
+				
+				if (ValidationOk)
+				{
+					if(input_id.text != ''){
+						FornecedorController.call("Salvar",alterarResult,FornecedorFormCadastro);
+					}else{
+						FornecedorController.call("Salvar",salvarResult,FornecedorFormCadastro);
+					}
+					
+				}else{
+					botao_salvar.enabled = ValidationOk;
+				}
+			}
+			
+			protected function alterarResult(event:ResultEvent):void{
+				fornecedorArray.setItemAt(event.result,grid_fornecedor.selectedIndex);
+			}
+			
+			protected function salvarResult(event:ResultEvent):void{
+				fornecedorArray.addItem(event.result);
+			}
+			
+			protected function excluirFornecedor(event:MouseEvent):void{
+				if (Number(input_id.text) > 0)
+				{
+					Alert.yesLabel="Sim";
+					Alert.noLabel ="Não";
+					Alert.show('Voce tem certeza que deja excluir o Fornecedor: '+input_nome.text,'Excluindo Fornecedor',3,this, confirmarExclusao)	
+				}             	    
+				else
+					Alert.show("Voce deve selecionar um registro para poder excluir"); 
+			}
+			
+			protected function confirmarExclusao(event:CloseEvent):void{
+				if(event.detail == Alert.YES){
+					FornecedorController.call("Deletar",excluirResult,int(input_id.text));
+				}
+			}
+			
+			protected function excluirResult(event:ResultEvent):void{
+				fornecedorArray.removeItemAt(grid_fornecedor.selectedIndex);
+			}
+			
+			protected function fornecedorExiste():void{
+				if(Number(input_id.text)>0){	
+					var oldCampo:String = grid_fornecedor.selectedItem.cnpj.toString();
+					if(oldCampo == input_cnpj.text){
+						FornecedorExisteValidacao.validate(false);
+					}
+					else{
+						FornecedorController.call("FornecedorExiste",existeResult,input_cnpj.text);
+					}
+				}else{
+					FornecedorController.call("FornecedorExiste",existeResult,input_cnpj.text);
+				}
+			}
+			
+			protected function existeResult(event:ResultEvent):void{
+				var fornecedorExiste:Boolean = event.result;
+				FornecedorExisteValidacao.validate(fornecedorExiste);
+				botao_salvar.enabled = !fornecedorExiste;
+			}
+			
+			protected function fornecedorSelecionado(event:Event):void{
+				var dadosFornecedor:Fornecedor = new Fornecedor(event.currentTarget.selectedItem);
+				input_id.text = dadosFornecedor.id_fornecedor.toString();
+				input_nome.text = dadosFornecedor.nome_fantasia;
+				input_cnpj.text = dadosFornecedor.cnpj.toString();
+				input_endereco.text = dadosFornecedor.endereco;
+				input_telefone.text = dadosFornecedor.telefone.toString();
+				input_email.text = dadosFornecedor.email;
+				input_cidade.text = dadosFornecedor.cidade;
+				input_inscricao.text = dadosFornecedor.inscricao_estadual;
+				input_razao.text = dadosFornecedor.razao_social;
+				input_celular.text = dadosFornecedor.celular;
+				input_representante.text = dadosFornecedor.representante;
+			}
+			
+			protected function limparCampos():void{
+				input_id.text = "";
+				input_nome.text = "";
+				input_cnpj.text = "";
+				input_endereco.text = "";
+				input_telefone.text = "";
+				input_email.text = "";
+				input_cidade.text = "";
+				input_inscricao.text = "";
+				input_razao.text = "";
+				input_celular.text = "";
+				input_representante.text = "";
+			}
+		]]>
+	</fx:Script>	
+	
+	<fx:Binding source="{int(input_id.text)}" destination="FornecedorFormCadastro.id_fornecedor"/>
+	<fx:Binding source="{input_nome.text}" destination="FornecedorFormCadastro.nome_fantasia"/>
+	<fx:Binding source="{input_cnpj.text}" destination="FornecedorFormCadastro.cnpj"/>
+	<fx:Binding source="{input_endereco.text}" destination="FornecedorFormCadastro.endereco"/>
+	<fx:Binding source="{input_telefone.text}" destination="FornecedorFormCadastro.telefone"/>
+	<fx:Binding source="{input_email.text}" destination="FornecedorFormCadastro.email"/>
+	<fx:Binding source="{input_cidade.text}" destination="FornecedorFormCadastro.cidade"/>
+	<fx:Binding source="{input_estado.selectedItem.id_estado}" destination="FornecedorFormCadastro.estado_id_estado"/>
+	<fx:Binding source="{input_razao.text}" destination="FornecedorFormCadastro.razao_social"/>
+	<fx:Binding source="{input_inscricao.text}" destination="FornecedorFormCadastro.inscricao_estadual"/>
+	<fx:Binding source="{input_celular.text}" destination="FornecedorFormCadastro.celular"/>
+	<fx:Binding source="{input_representante.text}" destination="FornecedorFormCadastro.representante"/>
+	<fx:Declarations>
+		<Validacao:FornecedorExisteValidacao id="FornecedorExisteValidacao" 
+										  source="{input_cnpj}" 
+										  property="text"/>
+		<mx:Validator id="nomeValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_nome}" 
+					  property="text" />
+		<mx:Validator id="cnpjValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_cnpj}" 
+					  property="text" />
+		<mx:Validator id="enderecoValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_endereco}" 
+					  property="text" />
+		<mx:Validator id="telefoneValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_telefone}" 
+					  property="text" />
+		<mx:Validator id="emailValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_email}" 
+					  property="text" />
+		<mx:Validator id="cidadeValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_cidade}" 
+					  property="text" />
+		<mx:Validator id="razaoValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_razao}" 
+					  property="text" />
+		<mx:Validator id="inscricaoValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_inscricao}" 
+					  property="text" />
+		<mx:Validator id="celularValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_celular}" 
+					  property="text" />
+		<mx:Validator id="representanteValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_representante}" 
+					  property="text" />
+	</fx:Declarations>
+</ns1:MDIWindow>
+
+
+

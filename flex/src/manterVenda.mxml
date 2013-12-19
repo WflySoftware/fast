@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ns1:MDIWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" 
+			   xmlns:ns1="flexmdi.containers.*" 
+			   layout="absolute" width="800" height="600"
+			   title="Manter Venda" creationComplete="createComplete(event)">
+	<s:Panel  y="10" height="174" title="Realizar Venda" fontSize="14" left="9" right="12">
+		
+		<s:Label x="284" y="19" text="Data da Venda:" id="label_data_venda"/>
+		<mx:DateField x="387" y="10" id="input_data_venda" yearNavigationEnabled="true" formatString="DD/MM/YYYY"/>
+		
+		<s:Label x="10" y="19" text="Funcionário:" id="label_funcionario"/>	
+		<s:ComboBox x="97" y="10" id="input_funcionario"  labelField="nome_funcionario"/>
+		
+		<s:Label x="10" y="58" text="Adicionar Produto:" id="label_adicionar"/>
+		<s:TextInput x="135" y="50" width="296" id="input_adicionar"/>
+		
+		<s:Label x="455" y="60" text="Quantidade:" id="label_quantidade"/>
+		<s:TextInput x="541" y="50" width="35" id="input_quantidade"/>
+		
+		<mx:Button x="601" y="52" label="Adicionar" id="botao_adicionar" click="adicionar(event)" />
+		
+		<mx:Button x="234" y="103" label="Finalizar" id="botao_finalizar" icon="@Embed('imagens/save.gif')" click="formaPagamento(event)" />
+		<mx:Button x="399" y="103" label="Cancelar" id="botao_cancelar" icon="@Embed('imagens/excluir.png')" click="cancelar(event)"/>
+	</s:Panel>
+	
+	<mx:DataGrid y="192" id="grid_compra" height="295"  right="11" left="10">
+		<mx:columns>
+			<mx:DataGridColumn width="350" headerText="Descrição" dataField="descricao" />
+			<mx:DataGridColumn width="100" headerText="Preço Unitário" dataField="preco_unitario"/>
+			<mx:DataGridColumn width="100" headerText="Quantidade" dataField="quantidade"/>
+			<mx:DataGridColumn width="100" headerText="Total" dataField="valor_total"/>	
+		</mx:columns>
+	</mx:DataGrid>
+	
+	<s:Label x="386" y="540" text="TOTAL: R$" id="label_total" fontSize="20"/>
+	<s:Label x="498" y="540"  id="visualizar_total" fontSize="20"/>
+	
+	<fx:Script>
+		<![CDATA[
+			import Model.Produto;
+			import Model.ProdutoVenda;
+			import Model.Venda;
+			
+			import br.connection.Server;
+			
+			import flashx.textLayout.operations.PasteOperation;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			[Bindable]
+			private var VendaFormCadastro:Venda;
+			private var ProdutoVendaFormCadastro:ProdutoVenda;
+			private var VendaController:Server;
+			private var ProdutoController:Server;
+			private var ProdutoVendaController:Server;
+			private var FuncionarioController:Server;
+			[Bindable]
+			private var compraArray:ArrayCollection;
+			[Bindable]
+			private var funcionarioArray:ArrayCollection;
+			[Bindable]
+			private var produtoVendaArray:ArrayCollection;
+			
+			
+			protected function createComplete(event:FlexEvent):void{
+				VendaFormCadastro	= new Venda();
+				ProdutoVendaFormCadastro = new ProdutoVenda();
+				VendaController = new Server("VendaController");
+				ProdutoVendaController = new Server("ProdutoVendaController");
+				FuncionarioController = new Server("FuncionarioController");
+				ProdutoController = new Server("ProdutoController");
+				FuncionarioController.call("ListarTodos",listarFuncionarioResult);
+				produtoVendaArray = new ArrayCollection();
+				grid_compra.dataProvider = produtoVendaArray;
+			}
+			
+			protected function listarFuncionarioResult(event:ResultEvent):void{
+				funcionarioArray = new ArrayCollection(event.result as Array);
+				input_funcionario.dataProvider = funcionarioArray;
+			}
+			
+			protected function formaPagamento(event:MouseEvent):void{
+				Alert.buttonWidth = 100;
+				Alert.yesLabel = "Dinheiro";
+				Alert.noLabel = "Cheque";
+				Alert.cancelLabel = "Cartão";
+
+				Alert.show("Informe a Forma de Pagamento:", "Venda", Alert.YES|Alert.NO|Alert.CANCEL,this,alertFinalizarPagamento);
+			}
+			
+			protected function alertFinalizarPagamento(event:CloseEvent):void{
+				if(event.detail == Alert.YES){
+					VendaFormCadastro.forma_pagamento = "Dinheiro";
+					this.salvarVenda();
+				}else if(event.detail == Alert.NO){
+					VendaFormCadastro.forma_pagamento = "Cheque";
+					this.salvarVenda();
+				}else if(event.detail == Alert.CANCEL){
+					Alert.buttonWidth = 100;
+					Alert.yesLabel = "Crédito";
+					Alert.noLabel = "Débito";
+					Alert.show("Informe tipo de cartão:", "Cartão", Alert.YES|Alert.NO,this,alertAnalisarCredito);
+				}
+			}
+			
+			protected function alertAnalisarCredito(event:CloseEvent):void{
+				if(event.detail == Alert.YES){
+					Alert.buttonWidth = 100;
+					Alert.yesLabel = "Parcelado";
+					Alert.noLabel = "À Vista";
+					Alert.show("Informe o tipo da venda:", "Cartão de Crédito", Alert.YES|Alert.NO,this,alertFinalizarCredito);
+				}else if(event.detail == Alert.NO){
+					VendaFormCadastro.forma_pagamento = "Cartão de Débito";
+					this.salvarVenda();
+				}
+			}
+			
+			protected function alertFinalizarCredito(event:CloseEvent):void{
+				if(event.detail == Alert.YES){
+					VendaFormCadastro.forma_pagamento = "Cartão de Crédito Parcelado";
+					this.salvarVenda();
+				}else if(event.detail == Alert.NO){
+					VendaFormCadastro.forma_pagamento = "Cartão de Crédito À Vista";
+					this.salvarVenda();
+				}
+			}
+			
+			protected function salvarVenda():void{
+				var ArrayValidators:Array = new Array();
+				ArrayValidators.push(dataValidacao);
+			
+				var ValidationOk : Boolean= Validator.validateAll(ArrayValidators).length == 0;
+				if (ValidationOk)
+				{
+						VendaFormCadastro.valor_total = Number(visualizar_total.text);
+						VendaController.call("Salvar",finalizarResult,VendaFormCadastro);
+				}else{
+					botao_finalizar.enabled = ValidationOk;
+				}
+			}
+			
+			protected function finalizarResult(event:ResultEvent):void{
+				input_adicionar.text = "";
+				input_data_venda.text = "";
+				input_quantidade.text = "";
+				visualizar_total.text = "";
+				VendaFormCadastro	= new Venda();
+				ProdutoVendaFormCadastro = new ProdutoVenda();
+				produtoVendaArray = new ArrayCollection();
+				produtoVendaArray.refresh();
+				Alert.show("Venda Finalizada com Sucesso");
+				this.windowManager.remove(this);
+			}
+			
+			protected function salvarResult(event:ResultEvent):void{
+				var dadosVenda:Venda = new Venda(event.result as Array);
+				ProdutoVendaFormCadastro.venda_id_venda = dadosVenda.id_venda;
+				VendaFormCadastro.id_venda = dadosVenda.id_venda;
+				VendaController.call("PesquisarProduto",adicionarResult,input_adicionar.text);
+			}
+			
+			protected function adicionar(event:MouseEvent):void{
+				VendaController.call("Salvar",salvarResult,VendaFormCadastro);
+			}
+			protected function adicionarResult(event:ResultEvent):void{
+				var dadosProduto:Produto = new Produto(event.result as Array);
+				ProdutoVendaFormCadastro.produto_id_produto = dadosProduto.id_produto;
+				ProdutoVendaFormCadastro.codigo = dadosProduto.codigo_personalizado;
+				ProdutoVendaFormCadastro.descricao = dadosProduto.descricao;
+				ProdutoVendaFormCadastro.preco_unitario = dadosProduto.preco_venda;
+				ProdutoVendaFormCadastro.quantidade = int(input_quantidade.text);
+				ProdutoVendaFormCadastro.valor_total = dadosProduto.preco_venda * int(input_quantidade.text);
+				visualizar_total.text = String(Number(visualizar_total.text) + ProdutoVendaFormCadastro.valor_total);
+				dadosProduto.quantidade = dadosProduto.quantidade - int(input_quantidade.text);
+				ProdutoController.call("Salvar",alterarQuantidadeResult,dadosProduto);
+				ProdutoVendaController.call("Salvar",produtoVendaResult,ProdutoVendaFormCadastro);
+			}
+			protected function produtoVendaResult(event:ResultEvent):void{
+				produtoVendaArray.addItem(event.result);
+			}
+			
+			protected function alterarQuantidadeResult(event:ResultEvent):void{
+				
+			}
+			
+			protected function cancelar(event: MouseEvent):void{
+				input_adicionar.text = "";
+				input_data_venda.text = "";
+				input_quantidade.text = "";
+				visualizar_total.text = "";
+				VendaFormCadastro	= new Venda();
+				ProdutoVendaFormCadastro = new ProdutoVenda();
+				produtoVendaArray = new ArrayCollection();
+				produtoVendaArray.removeAll();
+			}
+		]]>
+	</fx:Script>	
+	<fx:Binding source="{input_funcionario.selectedItem.id_funcionario}" destination="VendaFormCadastro.funcionario_id_funcionario"/>
+	<fx:Binding source="{formatacaoData.format(input_data_venda.text)}" destination="VendaFormCadastro.data_venda"/>
+	<fx:Binding source="{int(visualizar_total.toString())}" destination="VendaFormCadastro.valor_total"/>
+	<fx:Declarations>
+		<mx:DateFormatter id="formatacaoData" formatString="YYYY-MM-DD"/>
+		<mx:DateFormatter id="formatacaoVisualizacaoData" formatString="DD/MM/YYYY"/>
+		<mx:Validator id="dataValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_data_venda}" 
+					  property="text" />
+		<mx:Validator id="funcionarioValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_funcionario}" 
+					  property="text" />
+		
+	</fx:Declarations>
+
+</ns1:MDIWindow>

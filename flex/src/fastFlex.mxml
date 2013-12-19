@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   xmlns:ns1="flexmdi.containers.*"
+			   xmlns:com="http://flexmdi.googlecode.com/"
+			   minWidth="1366" minHeight="768">
+
+	<s:creationComplete>
+		<![CDATA[
+			chamaLogin();
+		]]>
+	</s:creationComplete>
+	<s:BitmapImage source="@Embed('imagens/fundo.jpg')"
+				   smooth="true" 
+				   left="0" 
+				   right="0"  
+				   top="0" 
+				   bottom="0"  />			
+	<mx:ApplicationControlBar dock="true" 
+							  width="100%">
+		<mx:MenuBar dataProvider="{menu}"
+					x="0" 
+					y="0" 
+					width="100%" 
+					labelField="@label" 
+					iconField="@icon" 
+					itemClick="itemClick(event)"/>
+	</mx:ApplicationControlBar>	
+	<ns1:MDICanvas id="MDICanvas" 
+				   width="100%" 
+				   horizontalCenter="0"
+				   top="41" 
+				   bottom="46">  
+		<s:Panel id="painel_avisos" x="1106" y="0" width="250" height="200" color="#FB0303"
+				 fontFamily="Verdana" fontSize="14" title="Avisos Importantes">
+			<s:RichText x="6" y="7" fontSize="13" fontStyle="normal" fontWeight="normal"
+						text="Atualizações:" textDecoration="none"/>
+			<s:RichText x="10" y="36" width="228" height="31" color="#403B3B" fontSize="12"
+						text="Cadastro de Produtos &#xd;Forma de Pagamento em Vendas&#xd;"/>
+		</s:Panel>
+	</ns1:MDICanvas>  
+	<fx:Script source="scriptFastFlex.as" />
+	<fx:Declarations>
+		<!-- Menu Bar -->
+		<fx:XMLList id="menu">
+			<fx:menuitem label="Cadastros" icon="icone_user">
+				<fx:menuitem label="Cadastro de Produto" icon="icone_menu" data="manterProduto"/>
+				<fx:menuitem label="Cadastro de Tipo Funcionário" icon="icone_menu" data="manterTipo"/>
+				<fx:menuitem label="Cadastro de Cliente" icon="icone_menu" data="manterCliente"/>
+				<fx:menuitem label="Cadastro de Fornecedor" icon="icone_menu" data="manterFornecedor"/>
+				<fx:menuitem label="Cadastro de Funcionário" icon="icone_menu" data="manterFuncionario"/>
+			</fx:menuitem>
+			<fx:menuitem label="Venda" icon="icone_rel">
+				<fx:menuitem label="Realizar Venda" icon="icone_menu" data="manterVenda"/> 
+			</fx:menuitem>
+			<fx:menuitem label="Pesquisa Rapida" icon="icone_acervo">
+				<fx:menuitem label="Pesquisa Produto" icon="icone_menu" data="pesquisaProduto"/>
+				<fx:menuitem label="Pesquisa Venda" icon="icone_menu" data="pesquisaVenda"/>
+			</fx:menuitem>
+		</fx:XMLList>
+		
+	</fx:Declarations>
+</s:Application>

@@ -1,0 +1,83 @@
+<ns1:MDIWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" 
+			   xmlns:ns1="flexmdi.containers.*" 
+			   layout="absolute" width="742" height="364"
+			   title="Pesquisa Rápida" creationComplete="createComplete(event)" xmlns:Validacao="Validacao.*">
+	<s:Panel y="10" height="112" title="Pesquisar Venda" fontSize="14" left="9" right="12">
+		<s:Label x="284" y="19" text="Data da Venda:" id="label_data_venda"/>
+		<mx:DateField x="387" y="9" id="input_data_venda" formatString="DD/MM/YYYY" yearNavigationEnabled="true"  />
+		<s:ComboBox x="97" y="10" id="input_funcionario"  labelField="nome_funcionario"/>
+		<s:Label x="10" y="19" text="Funcionário:" id="label_funcionario"/>
+		
+		
+		<mx:Button y="43" label="Limpar" id="botao_limpar" click="limparCampos()" icon="@Embed('imagens/limpar.gif')" x="517"/>
+		<mx:Button x="604" y="43" label="Pesquisar" id="botao_salvar" icon="@Embed('imagens/save.gif')" click="pesquisarVenda(event)"/>
+		
+	</s:Panel>
+	<mx:DataGrid y="144" id="grid_venda" height="151" right="11" left="10">
+		<mx:columns>
+			<mx:DataGridColumn width="30" headerText="ID" dataField="id_venda" />
+			<mx:DataGridColumn width="300" headerText="Funcionário" dataField="nome_funcionario"/>
+			<mx:DataGridColumn width="150" headerText="Data Venda" dataField="data_venda"/>
+			<mx:DataGridColumn width="150" headerText="Valor" dataField="valor_total"/>
+		</mx:columns>
+	</mx:DataGrid>
+	<fx:Script>
+		<![CDATA[
+			import Model.Venda;
+			
+			import br.connection.Server;
+			
+			import flashx.textLayout.operations.PasteOperation;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			private var VendaController:Server;
+			private var FuncionarioController:Server;
+			[Bindable]
+			private var vendaArray:ArrayCollection;
+			[Bindable]
+			private var funcionarioArray:ArrayCollection;
+			
+			
+			protected function createComplete(event:FlexEvent):void{
+				VendaController = new Server("VendaController");
+				FuncionarioController = new Server("FuncionarioController");
+				FuncionarioController.call("ListarTodos",listarFuncionarioResult);
+				vendaArray = new ArrayCollection();
+				grid_venda.dataProvider = vendaArray;
+			}
+			protected function listarFuncionarioResult(event:ResultEvent):void{
+				funcionarioArray = new ArrayCollection(event.result as Array);
+				input_funcionario.dataProvider = funcionarioArray;
+			}
+			
+			protected function pesquisarVenda(event:MouseEvent):void{
+				if((input_data_venda.text = '')){
+					VendaController.call("PesquisarPorFuncionario",pesquisaResult,input_funcionario.selectedItem.id_funcionario);		
+				}else{
+					VendaController.call("PesquisarPorData",pesquisaResult,formatacaoData.format(input_data_venda.text));
+				}
+			}
+			
+			protected function pesquisaResult(event:ResultEvent):void{
+				vendaArray.addItem(event.result);
+			}
+			
+			protected function limparCampos():void{
+				input_data_venda.text = "";
+				input_funcionario.selectedIndex = 0;
+			}
+		]]>
+	</fx:Script>	
+	
+	<fx:Declarations>
+		<mx:DateFormatter id="formatacaoData" formatString="YYYY-MM-DD"/>
+		<mx:DateFormatter id="formatacaoVisualizacaoData" formatString="DD/MM/YYYY"/>
+	</fx:Declarations>
+</ns1:MDIWindow>

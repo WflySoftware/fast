@@ -1,0 +1,419 @@
+<ns1:MDIWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" 
+			   xmlns:ns1="flexmdi.containers.*" 
+			   layout="absolute" width="742" height="558"
+			   title="Manter Funcionario" creationComplete="createComplete(event)" xmlns:Validacao="Validacao.*">
+	<s:Panel y="10" height="335" title="Editar Funcionario" fontSize="14" left="9" right="12">
+		
+		<s:Label x="10" y="32" text="ID:" fontSize="15" id="label_id"/>
+		<s:TextInput x="50" y="23" width="37" id="input_id" editable="false" />
+		
+		<s:Label x="91" y="32" text="Nome:" id="label_nome"/>
+		<s:TextInput x="140" y="23" width="567" id="input_nome"/>
+		
+		<s:Label x="10" y="69" text="Endereço:" id="label_endereco"/>
+		<s:TextInput x="82" y="59" width="336" id="input_endereco" />
+		
+		<s:Label x="426" y="69" text="Cidade:" id="label_cidade"/>
+		<s:TextInput x="479" y="59" width="135" id="input_cidade"/>
+		
+		<s:Label x="622" y="69" text="UF:" id="label_estado"/>
+		<s:ComboBox x="655" y="59" width="52" id="input_estado" labelField="sigla"/>
+		
+		<s:Label x="10" y="105" text="CPF:" id="label_cpf"/>
+		<s:TextInput x="50" y="99" width="157" id="input_cpf" restrict="0-9" maxChars="11" focusOut="funcionarioExiste()"/>
+		
+		<s:Label x="215" y="107" text="RG:" id="label_rg"/>
+		<s:TextInput x="248" y="99" width="83" id="input_rg" restrict="0-9" maxChars="15" />
+		
+		<s:Label x="340" y="106" text="Orgão:" id="label_orgao"/>
+		<s:TextInput x="392" y="99" width="83" id="input_orgao"/>
+		<s:ComboBox x="483" y="99" width="52" id="input_estado_orgao" labelField="sigla"/>
+		
+		<s:Label x="538" y="105" text="Expedição:" id="label_expedicao"/>
+		<mx:DateField id="input_expedicao" x="612" y="99" width="95" formatString="DD/MM/YYYY"
+					  yearNavigationEnabled="true"/>
+		
+		<s:Label x="10" y="139" text="Data Nascimento:" id="label_datanascimento"/>
+		<mx:DateField x="124" y="129" id="input_datanascimento" yearNavigationEnabled="true" formatString="DD/MM/YYYY"/>
+		
+		<s:Label x="237" y="135" text="Telefone:" id="label_telefone"/>
+		<s:TextInput x="304" y="129" width="102" id="input_telefone" restrict="0-9" maxChars="10"/>
+		
+		<s:Label x="409" y="135" text="Email:" id="label_email"/>
+		<s:TextInput x="456" y="129" width="251" id="input_email"/>
+		
+		<s:Label x="10" y="171" text="Celular:" id="label_celular"/>
+		<s:TextInput x="67" y="161" width="102" id="input_celular" restrict="0-9" maxChars="10"/>
+		
+		<s:Label x="173" y="171" text="Tipo de Contrato:" id="label_tipo_contrato"/>
+		<s:ComboBox x="292" y="161" width="156" id="input_contrato" labelField="name">
+			<s:dataProvider>
+				<s:ArrayList>
+					<fx:Object name="" data="-1"/>
+					<fx:Object name="Contrato" data="Contrato"/>
+					<fx:Object name="Carteira Assinada" data="Carteira Assinada"/>
+				</s:ArrayList>
+			</s:dataProvider>
+		</s:ComboBox>
+		
+		<s:Label x="473" y="171" text="Data Admissão:" id="label_dataadmissao"/>
+		<mx:DateField id="input_dataadmissao" x="577" y="161" width="130" formatString="DD/MM/YYYY"
+					  yearNavigationEnabled="true"/>
+		
+		<s:Label x="10" y="200" text="Banco:" id="label_banco"/>
+		<s:TextInput x="62" y="193" width="107" id="input_banco"/>
+		
+		<s:Label x="177" y="200" text="Agencia:" id="label_agencia"/>
+		<s:TextInput x="240" y="193" width="113" id="input_agencia" restrict="0-9" maxChars="5" />
+		
+		<s:Label x="361" y="200" text="Conta:" id="label_conta"/>
+		<s:TextInput x="411" y="193" width="102" id="input_conta" restrict="0-9" maxChars="12" />
+		
+		<s:Label x="517" y="200" text="Salário:" id="label_salario"/>
+		<s:TextInput x="577" y="193" width="130" id="input_salario" restrict="0-9-." maxChars="5" />
+		
+		<s:Label x="10" y="231" text="Login:" id="label_login"/>
+		<s:TextInput x="50" y="225" width="157" id="input_login" />
+		
+		<s:Label x="214" y="231" text="Senha:" id="label_senha" />
+		<s:TextInput x="267" y="225" width="136" id="input_senha" displayAsPassword="true"/>
+		
+		<s:Label x="431" y="231" text="Tipo Funcionário:" id="label_tipo_func"/>
+		<s:ComboBox x="550" y="225" width="156" id="input_tipo" labelField="tipo"/>
+		
+		<mx:Button y="274" label="Limpar" id="botao_limpar" click="limparCampos()" icon="@Embed('imagens/limpar.gif')" x="544"/>
+		<mx:Button x="631" y="274" label="Salvar" id="botao_salvar" icon="@Embed('imagens/save.gif')"  click="salvarFuncionario(event)"/>
+		<mx:Button x="459" y="274" label="Excluir" id="botao_excluir" icon="@Embed('imagens/excluir.png')"  click="excluirFuncionario(event)"/>
+	</s:Panel>
+	
+	<mx:DataGrid y="368" id="grid_funcionario" height="151" right="11" left="10" change="funcionarioSelecionado(event)">
+		<mx:columns>
+			<mx:DataGridColumn width="30" headerText="ID" dataField="id_funcionario" />
+			<mx:DataGridColumn width="250" headerText="Nome" dataField="nome_funcionario"/>
+			<mx:DataGridColumn width="100" headerText="Telefone" dataField="telefone"/>
+			<mx:DataGridColumn width="150" headerText="Email" dataField="email"/>
+		</mx:columns>
+	</mx:DataGrid>
+	
+	<fx:Script>
+		<![CDATA[
+			import Model.Funcionario;
+			
+			import br.connection.Server;
+			
+			import flashx.textLayout.operations.PasteOperation;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			[Bindable]
+			private var FuncionarioFormCadastro:Funcionario;
+			private var FuncionarioController:Server;
+			private var EstadoController:Server;
+			private var TipoController:Server;
+			[Bindable]
+			private var funcionarioArray:ArrayCollection;
+			[Bindable]
+			private var estadoArray:ArrayCollection;
+			[Bindable]
+			private var tipoArray:ArrayCollection;
+			
+			
+			protected function createComplete(event:FlexEvent):void{
+				FuncionarioFormCadastro	= new Funcionario();
+				FuncionarioController = new Server("FuncionarioController");
+				EstadoController = new Server("EstadoController");
+				TipoController = new Server("TipoFuncionarioController");
+				TipoController.call("ListarTodos",listarTipoResult);
+				FuncionarioController.call("ListarTodos",listarResult);
+				EstadoController.call("ListarTodos",listarEstadoResult);
+			}
+			
+			protected function listarResult(event:ResultEvent):void{
+				funcionarioArray = new ArrayCollection(event.result as Array);
+				grid_funcionario.dataProvider = funcionarioArray;
+			}
+			
+			protected function listarEstadoResult(event:ResultEvent):void{
+				estadoArray = new ArrayCollection(event.result as Array);
+				input_estado.dataProvider = estadoArray;
+				input_estado_orgao.dataProvider = estadoArray;
+			}
+			
+			protected function listarTipoResult(event:ResultEvent):void{
+				tipoArray = new ArrayCollection(event.result as Array);
+				input_tipo.dataProvider = tipoArray;
+			}
+			
+			protected function salvarFuncionario(event:MouseEvent):void{
+				var ArrayValidators:Array = new Array();
+				ArrayValidators.push(nomeValidacao);
+				ArrayValidators.push(cpfValidacao);
+				ArrayValidators.push(enderecoValidacao);
+				ArrayValidators.push(telefoneValidacao);
+				ArrayValidators.push(emailValidacao);
+				
+				var ValidationOk : Boolean= Validator.validateAll(ArrayValidators).length == 0;
+				
+				if (ValidationOk)
+				{
+					if(input_id.text != ''){
+						FuncionarioController.call("Salvar",alterarResult,FuncionarioFormCadastro);
+					}else{
+						FuncionarioController.call("Salvar",salvarResult,FuncionarioFormCadastro);
+					}
+					
+				}else{
+					botao_salvar.enabled = ValidationOk;
+				}
+			}
+			
+			protected function alterarResult(event:ResultEvent):void{
+				funcionarioArray.setItemAt(event.result,grid_funcionario.selectedIndex);
+			}
+			
+			protected function salvarResult(event:ResultEvent):void{
+				funcionarioArray.addItem(event.result);
+			}
+			
+			protected function excluirFuncionario(event:MouseEvent):void{
+				if (Number(input_id.text) > 0)
+				{
+					Alert.yesLabel="Sim";
+					Alert.noLabel ="Não";
+					Alert.show('Voce tem certeza que deja excluir o Funcionario: '+input_nome.text,'Excluindo Funcionario',3,this, confirmarExclusao)	
+				}             	    
+				else
+					Alert.show("Voce deve selecionar um registro para poder excluir"); 
+			}
+			
+			protected function confirmarExclusao(event:CloseEvent):void{
+				if(event.detail == Alert.YES){
+					FuncionarioController.call("Deletar",excluirResult,int(input_id.text));
+				}
+			}
+			
+			protected function excluirResult(event:ResultEvent):void{
+				funcionarioArray.removeItemAt(grid_funcionario.selectedIndex);
+			}
+			
+			protected function funcionarioExiste():void{
+				if(Number(input_id.text)>0){	
+					var oldCpf:String = grid_funcionario.selectedItem.cpf.toString();
+					if(oldCpf == input_cpf.text){
+						FuncionarioExisteValidacao.validate(false);
+					}
+					else{
+						FuncionarioController.call("FuncionarioExiste",existeResult,input_cpf.text);
+					}
+				}else{
+					FuncionarioController.call("FuncionarioExiste",existeResult,input_cpf.text);
+				}
+			}
+			
+			protected function existeResult(event:ResultEvent):void{
+				var funcionarioExiste:Boolean = event.result;
+				FuncionarioExisteValidacao.validate(funcionarioExiste);
+				botao_salvar.enabled = !funcionarioExiste;
+			}
+			
+			protected function funcionarioSelecionado(event:Event):void{
+				var dadosFuncionario:Funcionario = new Funcionario(event.currentTarget.selectedItem);
+				input_id.text = dadosFuncionario.id_funcionario.toString();
+				input_nome.text = dadosFuncionario.nome_funcionario;
+				//input_tipo.selectedItem.id_tipo_funcionario = dadosFuncionario.tipo_funcionario_id_tipo_funcionario;
+				input_cpf.text = dadosFuncionario.cpf.toString();
+				input_endereco.text = dadosFuncionario.endereco;
+				input_telefone.text = dadosFuncionario.telefone.toString();
+				input_email.text = dadosFuncionario.email;
+				input_cidade.text = dadosFuncionario.cidade;
+				input_datanascimento.text = formatacaoVisualizacaoData.format(dadosFuncionario.data_nascimento.toString());
+				input_login.text = dadosFuncionario.login;
+				input_rg.text = dadosFuncionario.rg;
+				input_orgao.text = dadosFuncionario.orgao;
+				input_expedicao.text = formatacaoVisualizacaoData.format(dadosFuncionario.data_expedicao.toString());
+				input_celular.text = dadosFuncionario.celular;
+				//input_contrato.selectedItem.name = dadosFuncionario.tipo_contrato.toString();
+				input_dataadmissao.text = formatacaoVisualizacaoData.format(dadosFuncionario.data_admissao.toString());
+				input_salario.text = dadosFuncionario.salario.toString();
+				input_banco.text = dadosFuncionario.banco;
+				input_agencia.text = dadosFuncionario.agencia;
+				input_conta.text = dadosFuncionario.conta;
+				//input_estado_orgao.selectedItem.name = dadosFuncionario.uf_orgao.toString();
+				input_senha.text = dadosFuncionario.senha;
+			}
+			
+			protected function limparCampos():void{
+				input_id.text = "";
+				input_nome.text = "";
+				input_cpf.text = "";
+				input_endereco.text = "";
+				input_telefone.text = "";
+				input_email.text = "";
+				input_cidade.text = "";
+				input_login.text = "";
+				input_rg.text = "";
+				input_orgao.text = "";
+				input_expedicao.text = "";
+				input_celular.text = "";
+				input_contrato.selectedItem.name = "";
+				input_dataadmissao.text = "";
+				input_salario.text = "";
+				input_banco.text = "";
+				input_agencia.text = "";
+				input_conta.text = "";
+			}
+		]]>
+	</fx:Script>	
+	
+	<fx:Binding source="{int(input_id.text)}" destination="FuncionarioFormCadastro.id_funcionario"/>
+	<fx:Binding source="{input_estado.selectedItem.id_estado}" destination="FuncionarioFormCadastro.estado_id_estado"/>
+	<fx:Binding source="{input_tipo.selectedItem.id_tipo_funcionario}" destination="FuncionarioFormCadastro.tipo_funcionario_id_tipo_funcionario"/>
+	<fx:Binding source="{input_nome.text}" destination="FuncionarioFormCadastro.nome_funcionario"/>
+	<fx:Binding source="{input_cpf.text}" destination="FuncionarioFormCadastro.cpf"/>
+	<fx:Binding source="{input_endereco.text}" destination="FuncionarioFormCadastro.endereco"/>
+	<fx:Binding source="{input_telefone.text}" destination="FuncionarioFormCadastro.telefone"/>
+	<fx:Binding source="{input_email.text}" destination="FuncionarioFormCadastro.email"/>
+	<fx:Binding source="{input_cidade.text}" destination="FuncionarioFormCadastro.cidade"/>
+	<fx:Binding source="{formatacaoData.format(input_datanascimento.text)}" destination="FuncionarioFormCadastro.data_nascimento"/>
+	<fx:Binding source="{input_login.text}" destination="FuncionarioFormCadastro.login"/>
+	<fx:Binding source="{input_senha.text}" destination="FuncionarioFormCadastro.senha"/>
+	<fx:Binding source="{input_rg.text}" destination="FuncionarioFormCadastro.rg"/>
+	<fx:Binding source="{input_orgao.text}" destination="FuncionarioFormCadastro.orgao"/>
+	<fx:Binding source="{formatacaoData.format(input_expedicao.text)}" destination="FuncionarioFormCadastro.data_expedicao"/>
+	<fx:Binding source="{input_celular.text}" destination="FuncionarioFormCadastro.celular"/>
+	<fx:Binding source="{input_contrato.selectedItem.name}" destination="FuncionarioFormCadastro.tipo_contrato"/>
+	<fx:Binding source="{formatacaoData.format(input_dataadmissao.text)}" destination="FuncionarioFormCadastro.data_admissao"/>
+	<fx:Binding source="{Number(input_salario.text)}" destination="FuncionarioFormCadastro.salario"/>
+	<fx:Binding source="{input_banco.text}" destination="FuncionarioFormCadastro.banco"/>
+	<fx:Binding source="{input_agencia.text}" destination="FuncionarioFormCadastro.agencia"/>
+	<fx:Binding source="{input_conta.text}" destination="FuncionarioFormCadastro.conta"/>
+	<fx:Binding source="{input_estado_orgao.selectedItem.sigla}" destination="FuncionarioFormCadastro.uf_orgao"/>
+	<fx:Declarations>
+		<Validacao:FuncionarioExisteValidacao id="FuncionarioExisteValidacao" 
+										  source="{input_cpf}" 
+										  property="text"/>
+		<mx:Validator id="nomeValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_nome}" 
+					  property="text" />
+		<mx:Validator id="cpfValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_cpf}" 
+					  property="text" />
+		<mx:Validator id="enderecoValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_endereco}" 
+					  property="text" />
+		<mx:Validator id="telefoneValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_telefone}" 
+					  property="text" />
+		<mx:Validator id="emailValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_email}" 
+					  property="text" />
+		<mx:Validator id="cidadeValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_cidade}" 
+					  property="text" />
+		<mx:Validator id="estadoValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_estado}" 
+					  property="text" />
+		<mx:Validator id="tipoValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_tipo}" 
+					  property="text" />
+		<mx:Validator id="estadoOrgaoValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_estado_orgao}" 
+					  property="text" />
+		<mx:Validator id="loginValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_login}" 
+					  property="text" />
+		<mx:Validator id="senhaValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_senha}" 
+					  property="text" />
+		<mx:Validator id="rgValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_rg}" 
+					  property="text" />
+		<mx:Validator id="orgaoValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_orgao}" 
+					  property="text" />
+		<mx:Validator id="expedicaoValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_expedicao}" 
+					  property="text" />
+		<mx:Validator id="nascimentoValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_datanascimento}" 
+					  property="text" />
+		<mx:Validator id="celularValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_celular}" 
+					  property="text" />
+		<mx:Validator id="tipoContratoValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_contrato}" 
+					  property="text" />
+		<mx:Validator id="admissaoValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_dataadmissao}" 
+					  property="text" />
+		<mx:Validator id="salarioValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_salario}" 
+					  property="text" />
+		<mx:Validator id="bancoValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_banco}" 
+					  property="text" />
+		<mx:Validator id="agenciaValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_agencia}" 
+					  property="text" />
+		<mx:Validator id="contaValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_conta}" 
+					  property="text" />
+		<mx:Validator id="ufOrgaoValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_estado_orgao}" 
+					  property="text" />
+		<mx:DateFormatter id="formatacaoData" formatString="YYYY-MM-DD"/>
+		<mx:DateFormatter id="formatacaoVisualizacaoData" formatString="DD/MM/YYYY"/>
+	</fx:Declarations>
+</ns1:MDIWindow>

@@ -1,0 +1,284 @@
+<ns1:MDIWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" 
+			   xmlns:ns1="flexmdi.containers.*" 
+			   layout="absolute" width="742" height="466"
+			   title="Manter Produto" creationComplete="createComplete(event)" xmlns:Validacao="Validacao.*">
+	<s:Panel y="10" height="196" title="Editar Produto" fontSize="14" left="9" right="12">
+		
+		<s:Label x="10" y="32" text="ID:" fontSize="15" id="label_id"/>
+		<s:TextInput x="50" y="23" width="37" id="input_id" editable="false" />
+		
+		<s:Label x="91" y="32" text="Descriçao:" id="label_descricao"/>
+		<s:TextInput x="166" y="23" width="527" id="input_descricao"/>
+		
+		<s:Label x="10" y="69" text="Cód. Barras:" id="label_barras"/>
+		<s:TextInput x="94" y="59" width="253" id="input_barras" focusOut="produtoExiste()" restrict="0-9"/>
+		
+		<s:Label x="355" y="69" text="Codigo:" id="label_codigo"/>
+		<s:TextInput x="408" y="59" width="96" id="input_codigo" restrict="0-9"/>
+		
+		<s:Label x="512" y="69" text="Exeção IPI:" id="label_exIPI"/>
+		<s:TextInput x="597" y="59" width="96" id="input_exIPI"/>	
+		
+		<s:Label x="10" y="105" text="Margem de Lucro:" id="label_lucro"/>
+		<s:TextInput x="135" y="99" width="40" id="input_lucro" restrict="0-9"/>
+		
+		<s:Label x="183" y="105" text="Custo:" id="label_custo"/>
+		<s:TextInput x="238" y="99" width="73" id="input_custo" restrict="0-9-." focusOut="calculaCusto()"/>
+		
+		<s:Label x="319" y="105" text="Venda:" id="label_venda"/>
+		<s:TextInput x="372" y="99" width="76" id="input_venda" restrict="0-9-."/>
+		
+		<s:Label x="456" y="105" text="Qtd:" id="label_qtd"/>
+		<s:TextInput x="490" y="99" width="37" id="input_qtd" restrict="0-9"/>
+		
+		<s:Label x="531" y="105" text="Unidade:" id="label_unidade"/>
+		<s:ComboBox x="599" y="99" width="94" id="input_unidade" labelField="name">
+			<s:dataProvider>
+				<s:ArrayList>
+					<fx:Object name="" data="-1"/>
+					<fx:Object name="UN" data="UN"/>
+					<fx:Object name="PC" data="PC"/>
+					<fx:Object name="CX" data="CX"/>
+					<fx:Object name="CJ" data="CJ"/>
+					<fx:Object name="KG" data="KG"/>
+				</s:ArrayList>
+			</s:dataProvider>
+		</s:ComboBox>
+		
+		<s:Label x="10" y="139" text="Estoque Minimo:" id="label_estoque"/>
+		<s:TextInput x="124" y="129" id="input_estoque" restrict="0-9"/>
+		
+		<s:Label x="280" y="139" text="NCM:"/>
+		<s:TextInput x="324" y="129" width="100" id="input_ncm"/>
+		
+		<mx:Button y="134" label="Limpar" id="botao_limpar" click="limparCampos()" icon="@Embed('imagens/limpar.gif')" x="531"/>
+		<mx:Button x="618" y="134" label="Salvar" id="botao_salvar" icon="@Embed('imagens/save.gif')" click="salvarProduto(event)"/>
+		<mx:Button x="446" y="134" label="Excluir" id="botao_excluir" icon="@Embed('imagens/excluir.png')" click="excluirProduto(event)"/>			
+	</s:Panel>
+	
+	<mx:DataGrid y="214" id="grid_produto" height="151" right="13" left="8" change="produtoSelecionado(event)">
+		<mx:columns>
+			<mx:DataGridColumn width="100" headerText="Codigo" dataField="codigo_personalizado" />
+			<mx:DataGridColumn width="400" headerText="Descricao" dataField="descricao"/>
+			<mx:DataGridColumn width="30" headerText="Qtd" dataField="quantidade"/>
+			<mx:DataGridColumn width="100" headerText="Preço de Venda" dataField="preco_venda"/>
+			<mx:DataGridColumn width="60" headerText="Lucro" dataField="margem_de_lucro"/>
+		</mx:columns>
+	</mx:DataGrid>
+	
+	<fx:Script>
+		<![CDATA[
+			import Model.Produto;
+			
+			import br.connection.Server;
+			
+			import flashx.textLayout.formats.Float;
+			import flashx.textLayout.operations.PasteOperation;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			[Bindable]
+			private var ProdutoFormCadastro:Produto;
+			private var ProdutoController:Server;
+			[Bindable]
+			private var produtoArray:ArrayCollection;
+			
+			
+			protected function createComplete(event:FlexEvent):void{
+				ProdutoFormCadastro	= new Produto();
+				ProdutoController = new Server("ProdutoController");
+				ProdutoController.call("ListarTodos",listarResult);
+			}
+			
+			protected function listarResult(event:ResultEvent):void{
+				produtoArray = new ArrayCollection(event.result as Array);
+				grid_produto.dataProvider = produtoArray;
+			}
+			
+			protected function salvarProduto(event:MouseEvent):void{
+				var ArrayValidators:Array = new Array();
+				ArrayValidators.push(descricaoValidacao);
+				ArrayValidators.push(margemValidacao);
+				ArrayValidators.push(quantidadeValidacao);
+				ArrayValidators.push(codigoValidacao);
+				ArrayValidators.push(custoValidacao);
+				ArrayValidators.push(vendaValidacao);
+				ArrayValidators.push(barrasValidacao);
+				ArrayValidators.push(ncmValidacao);
+				ArrayValidators.push(estoqueValidacao);
+				ArrayValidators.push(execaoValidacao);
+				
+				var ValidationOk : Boolean= Validator.validateAll(ArrayValidators).length == 0;
+				
+				if (ValidationOk)
+				{
+					if(input_id.text != ''){
+						ProdutoController.call("Salvar",alterarResult,ProdutoFormCadastro);
+					}else{
+						ProdutoController.call("Salvar",salvarResult,ProdutoFormCadastro);
+					}
+					
+				}else{
+					botao_salvar.enabled = ValidationOk;
+				}
+			}
+			
+			protected function alterarResult(event:ResultEvent):void{
+				produtoArray.setItemAt(event.result,grid_produto.selectedIndex);
+			}
+			
+			protected function salvarResult(event:ResultEvent):void{
+				produtoArray.addItem(event.result);
+			}
+			
+			protected function excluirProduto(event:MouseEvent):void{
+				if (Number(input_id.text) > 0)
+				{
+					Alert.yesLabel="Sim";
+					Alert.noLabel ="Não";
+					Alert.show('Voce tem certeza que deja excluir o Produto: '+input_descricao.text,'Excluindo Produto',3,this, confirmarExclusao)	
+				}             	    
+				else
+					Alert.show("Voce deve selecionar um registro para poder excluir"); 
+			}
+			
+			protected function confirmarExclusao(event:CloseEvent):void{
+				if(event.detail == Alert.YES){
+					ProdutoController.call("Deletar",excluirResult,int(input_id.text));
+				}
+			}
+			
+			protected function excluirResult(event:ResultEvent):void{
+				produtoArray.removeItemAt(grid_produto.selectedIndex);
+			}
+			
+			protected function produtoExiste():void{
+				if(Number(input_id.text)>0){	
+					ProdutoExisteValidacao.validate(false);
+				}else{
+					ProdutoController.call("ProdutoExiste",existeResult,input_barras.text);
+				}
+			}
+			
+			protected function calculaCusto():void{
+				var margemLucro:int = int(input_lucro.text);
+				var precoCusto:Number = Number(input_custo.text);
+				var precoVenda:Number = (precoCusto * (margemLucro/100)) + precoCusto;
+				input_venda.text = precoVenda.toString();
+			}
+			
+			protected function existeResult(event:ResultEvent):void{
+				var produtoExiste:Boolean = event.result;
+				ProdutoExisteValidacao.validate(produtoExiste);
+				botao_salvar.enabled = !produtoExiste;
+			}
+			
+			protected function produtoSelecionado(event:Event):void{
+				var dadosProduto:Produto = new Produto(event.currentTarget.selectedItem);
+				input_barras.text = dadosProduto.codigo_barras.toString();
+				input_codigo.text = dadosProduto.codigo_personalizado.toString();
+				input_custo.text = dadosProduto.preco_custo.toString();
+				input_descricao.text = dadosProduto.descricao;
+				input_estoque.text = dadosProduto.estoque_minimo.toString();
+				input_exIPI.text = dadosProduto.execao_ipi;
+				input_id.text = dadosProduto.id_produto.toString();
+				input_lucro.text = dadosProduto.margem_de_lucro.toString();
+				input_ncm.text = dadosProduto.ncm;
+				input_qtd.text = dadosProduto.quantidade.toString();
+				input_venda.text = dadosProduto.preco_venda.toString();
+				input_unidade.selectedItem.name = dadosProduto.unidade_tributada;
+			}
+			
+			protected function limparCampos():void{
+				input_barras.text = "";
+				input_codigo.text = "";
+				input_custo.text = "";
+				input_descricao.text = "";
+				input_estoque.text = "";
+				input_exIPI.text = "";
+				input_id.text = "";
+				input_lucro.text = "";
+				input_ncm.text = "";
+				input_qtd.text = "";
+				input_venda.text = "";
+			}
+		]]>
+	</fx:Script>	
+	
+	<fx:Binding source="{int(input_id.text)}" destination="ProdutoFormCadastro.id_produto"/>
+	<fx:Binding source="{int(input_codigo.text)}" destination="ProdutoFormCadastro.codigo_personalizado"/>
+	<fx:Binding source="{input_unidade.selectedItem.name}" destination="ProdutoFormCadastro.unidade_tributada"/>
+	<fx:Binding source="{int(input_lucro.text)}" destination="ProdutoFormCadastro.margem_de_lucro"/>
+	<fx:Binding source="{Number(input_custo.text)}" destination="ProdutoFormCadastro.preco_custo"/>
+	<fx:Binding source="{Number(input_venda.text)}" destination="ProdutoFormCadastro.preco_venda"/>
+	<fx:Binding source="{input_barras.text}" destination="ProdutoFormCadastro.codigo_barras"/>
+	<fx:Binding source="{input_ncm.text}" destination="ProdutoFormCadastro.ncm"/>
+	<fx:Binding source="{input_exIPI.text}" destination="ProdutoFormCadastro.execao_ipi"/>
+	<fx:Binding source="{int(input_estoque.text)}" destination="ProdutoFormCadastro.estoque_minimo"/>
+	<fx:Binding source="{input_descricao.text}" destination="ProdutoFormCadastro.descricao"/>
+	<fx:Binding source="{int(input_qtd.text)}" destination="ProdutoFormCadastro.quantidade"/>
+	
+	<fx:Declarations>
+		<Validacao:ProdutoExisteValidacao id="ProdutoExisteValidacao" 
+										  source="{input_barras}" 
+										  property="text"/>
+		<mx:Validator id="descricaoValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_descricao}" 
+					  property="text" />
+		<mx:Validator id="codigoValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_codigo}" 
+					  property="text" />
+		<mx:Validator id="margemValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_lucro}" 
+					  property="text" />
+		<mx:Validator id="custoValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_custo}" 
+					  property="text" />
+		<mx:Validator id="vendaValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_venda}" 
+					  property="text" />
+		<mx:Validator id="barrasValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_barras}" 
+					  property="text" />
+		<mx:Validator id="ncmValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_ncm}" 
+					  property="text" />
+		<mx:Validator id="execaoValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_exIPI}" 
+					  property="text" />
+		<mx:Validator id="estoqueValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_estoque}" 
+					  property="text" />
+		<mx:Validator id="quantidadeValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_qtd}" 
+					  property="text" />
+		
+	</fx:Declarations>
+</ns1:MDIWindow>
+

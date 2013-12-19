@@ -1,0 +1,149 @@
+<ns1:MDIWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" 
+			   xmlns:ns1="flexmdi.containers.*" 
+			   layout="absolute" width="742" height="402"
+			   title="Manter Tipo Funcionário " creationComplete="createComplete(event)" xmlns:Validacao="Validacao.*">
+	<s:Panel y="10" height="134" title="Editar Funcionário" fontSize="14" left="9" right="12">
+		
+		<s:Label x="10" y="32" text="ID:" fontSize="15" id="label_id"/>
+		<s:Label x="91" y="32" text="Tipo Funcionário:" id="label_tipo"/>
+		
+		<s:TextInput x="50" y="23" width="37" id="input_id" editable="false" />
+		<s:TextInput x="210" y="23" width="483" id="input_tipo" focusOut="tipoExiste()"/>
+		
+		<mx:Button y="66" label="Limpar" id="botao_limpar" click="limparCampos()" icon="@Embed('imagens/limpar.gif')" x="530"/>
+		<mx:Button x="617" y="66" label="Salvar" id="botao_salvar" icon="@Embed('imagens/save.gif')" click="salvarTipo(event)"/>
+		<mx:Button x="445" y="66" label="Excluir" id="botao_excluir" icon="@Embed('imagens/excluir.png')" click="excluirTipo(event)"/>
+	</s:Panel>
+	
+	<mx:DataGrid y="163" id="grid_tipo" height="151" right="12" left="9" change="tipoSelecionado(event)">
+		<mx:columns>
+			<mx:DataGridColumn width="100" headerText="ID" dataField="id_tipo_funcionario" />
+			<mx:DataGridColumn width="400" headerText="Tipo" dataField="tipo"/>
+		</mx:columns>
+	</mx:DataGrid>
+	
+	<fx:Script>
+		<![CDATA[
+			import Model.TipoFuncionario;
+			
+			import br.connection.Server;
+			
+			import flashx.textLayout.operations.PasteOperation;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			[Bindable]
+			private var TipoFormCadastro:TipoFuncionario;
+			private var TipoController:Server;
+			[Bindable]
+			private var tipoArray:ArrayCollection;
+			
+			
+			protected function createComplete(event:FlexEvent):void{
+				TipoFormCadastro	= new TipoFuncionario();
+				TipoController = new Server("TipoFuncionarioController");
+				TipoController.call("ListarTodos",listarResult);
+			}
+			
+			protected function listarResult(event:ResultEvent):void{
+				tipoArray = new ArrayCollection(event.result as Array);
+				grid_tipo.dataProvider = tipoArray;
+			}
+			
+			protected function salvarTipo(event:MouseEvent):void{
+				var ArrayValidators:Array = new Array();
+				ArrayValidators.push(tipoValidacao);
+				
+				var ValidationOk : Boolean= Validator.validateAll(ArrayValidators).length == 0;
+				
+				if (ValidationOk)
+				{
+					if(input_id.text != ''){
+						TipoController.call("Salvar",alterarResult,TipoFormCadastro);
+					}else{
+						TipoController.call("Salvar",salvarResult,TipoFormCadastro);
+					}
+					
+				}else{
+					botao_salvar.enabled = ValidationOk;
+				}
+			}
+			
+			protected function alterarResult(event:ResultEvent):void{
+				tipoArray.setItemAt(event.result,grid_tipo.selectedIndex);
+			}
+			
+			protected function salvarResult(event:ResultEvent):void{
+				tipoArray.addItem(event.result);
+			}
+			
+			protected function excluirTipo(event:MouseEvent):void{
+				if (Number(input_id.text) > 0)
+				{
+					Alert.yesLabel="Sim";
+					Alert.noLabel ="Não";
+					Alert.show('Voce tem certeza que deja excluir o Tipo: '+input_tipo.text,'Excluindo Tipo',3,this, confirmarExclusao)	
+				}             	    
+				else
+					Alert.show("Voce deve selecionar um registro para poder excluir"); 
+			}
+			
+			protected function confirmarExclusao(event:CloseEvent):void{
+				if(event.detail == Alert.YES){
+					TipoController.call("Deletar",excluirResult,int(input_id.text));
+				}
+			}
+			
+			protected function excluirResult(event:ResultEvent):void{
+				tipoArray.removeItemAt(grid_tipo.selectedIndex);
+			}
+			
+			protected function tipoExiste():void{
+				if(Number(input_id.text) > 0){	
+					TipoFuncionarioExisteValidacao.validate(false);
+				}else{
+					
+					TipoController.call("TipoExiste",existeResult,input_tipo.text);
+				}
+			}
+			
+			protected function existeResult(event:ResultEvent):void{
+				var tipoExiste:Boolean = event.result;
+				TipoFuncionarioExisteValidacao.validate(tipoExiste);
+				botao_salvar.enabled = !tipoExiste;
+			}
+			
+			protected function tipoSelecionado(event:Event):void{
+				var dadosTipo:TipoFuncionario = new TipoFuncionario(event.currentTarget.selectedItem);
+				input_tipo.text = dadosTipo.tipo.toString();
+				input_id.text = dadosTipo.id_tipo_funcionario.toString();
+			}
+			
+			protected function limparCampos():void{
+				input_id.text = "";
+				input_tipo.text = "";
+			}
+		]]>
+	</fx:Script>	
+	
+	<fx:Binding source="{int(input_id.text)}" destination="TipoFormCadastro.id_tipo_funcionario"/>
+	<fx:Binding source="{input_tipo.text}" destination="TipoFormCadastro.tipo"/>
+	
+	<fx:Declarations>
+		<Validacao:TipoFuncionarioExisteValidacao id="TipoFuncionarioExisteValidacao" 
+										  source="{input_tipo}" 
+										  property="text"/>
+		<mx:Validator id="tipoValidacao" 
+					  required="true" 
+					  requiredFieldError="Este campo é obrigatório" 
+					  source="{input_tipo}" 
+					  property="text" />
+		
+	</fx:Declarations>
+</ns1:MDIWindow>
