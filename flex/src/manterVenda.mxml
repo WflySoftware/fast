@@ -166,6 +166,7 @@
 			}
 			
 			protected function adicionar(event:MouseEvent):void{
+				var data:String = input_data_venda.text;
 				VendaController.call("Salvar",salvarResult,VendaFormCadastro);
 			}
 			protected function adicionarResult(event:ResultEvent):void{
