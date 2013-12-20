@@ -19,7 +19,7 @@ class ProdutoController extends ControllerBase{
 			$produtoTabela->createRow((array)$produto)->save();
 		}
 		
-		return $produtoTabela->fetchRow("codigo_barras LIKE '%$produto->codigo_barras%'")->toArray();
+		return $produtoTabela->fetchRow("codigo_barras = '$produto->codigo_barras'")->toArray();
 	}
 	
 	public function ListarTodos(){
