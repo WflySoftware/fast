@@ -11,8 +11,9 @@
 		<s:Label x="10" y="19" text="Funcionário:" id="label_funcionario"/>
 		
 		
-		<mx:Button y="43" label="Limpar" id="botao_limpar" click="limparCampos()" icon="@Embed('imagens/limpar.gif')" x="517"/>
-		<mx:Button x="604" y="43" label="Pesquisar" id="botao_salvar" icon="@Embed('imagens/save.gif')" click="pesquisarVenda(event)"/>
+		<mx:Button y="43" label="Limpar" id="botao_limpar" click="limparCampos()" icon="@Embed('imagens/limpar.gif')" x="442"/>
+		<mx:Button x="604" y="43" label="Funcionario" id="botao_funcionario" icon="@Embed('imagens/save.gif')" click="pesquisarVendaFuncionario(event)"/>
+		<mx:Button x="529" y="43" label="Data" id="botao_data" icon="@Embed('imagens/save.gif')" click="pesquisarVendaData(event)"/>
 		
 	</s:Panel>
 	<mx:DataGrid y="144" id="grid_venda" height="151" right="11" left="10">
@@ -43,6 +44,8 @@
 			private var vendaArray:ArrayCollection;
 			[Bindable]
 			private var funcionarioArray:ArrayCollection;
+			[Bindable]
+			var arrayVenda:Object;
 			
 			
 			protected function createComplete(event:FlexEvent):void{
@@ -57,27 +60,40 @@
 				input_funcionario.dataProvider = funcionarioArray;
 			}
 			
-			protected function pesquisarVenda(event:MouseEvent):void{
-				if((input_data_venda.text = '')){
-					VendaController.call("PesquisarPorFuncionario",pesquisaResult,input_funcionario.selectedItem.id_funcionario);		
-				}else{
-					VendaController.call("PesquisarPorData",pesquisaResult,formatacaoData.format(input_data_venda.text));
+			protected function pesquisarVendaFuncionario(event:MouseEvent):void{
+				VendaController.call("PesquisarPorFuncionario",pesquisaResultVenda,input_funcionario.selectedItem.id_funcionario);		
+			}
+			protected function pesquisarVendaData(event:MouseEvent):void{
+				VendaController.call("PesquisarPorData",pesquisaResultVenda,formatacaoData.format(input_data_venda.text));
+			}
+			protected function pesquisaResultVenda(event:ResultEvent):void{
+				arrayVenda = event.result;
+				for(var i:Number = 0;i< arrayVenda.length; i++){
+					var dataNaoFormatada:String = arrayVenda[i]['data_venda'];
+					arrayVenda[i]['data_venda'] = formatacaoVisualizacaoData.format(dataNaoFormatada);
 				}
+				vendaArray = new ArrayCollection(arrayVenda as Array);
+				grid_venda.dataProvider = vendaArray;
 			}
 			
-			protected function pesquisaResult(event:ResultEvent):void{
-				vendaArray.addItem(event.result);
-			}
+			//protected function pesquisaResultFuncionario(event:ResultEvent):void{
+			//	var arrayFuncionario:Object = event.result;
+			//	var nomeFuncionario:String = arrayFuncionario['nome_funcionario'];
+			//	arrayVenda['nome_funcionario'] = nomeFuncionario;
+			//	
+			//}
 			
 			protected function limparCampos():void{
 				input_data_venda.text = "";
-				input_funcionario.selectedIndex = 0;
+				input_funcionario.instanceIndex;
+				vendaArray = new ArrayCollection();
+				grid_venda.dataProvider = vendaArray;
 			}
 		]]>
 	</fx:Script>	
 	
 	<fx:Declarations>
-		<mx:DateFormatter id="formatacaoData" formatString="YYYY-MM-DD"/>
+		<s:DateTimeFormatter id="formatacaoData" dateTimePattern="yyyy-dd-MM" />
 		<mx:DateFormatter id="formatacaoVisualizacaoData" formatString="DD/MM/YYYY"/>
 	</fx:Declarations>
 </ns1:MDIWindow>

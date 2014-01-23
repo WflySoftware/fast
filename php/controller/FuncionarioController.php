@@ -37,4 +37,14 @@ public function Salvar($funcionario){
 		$row = $funcionarioTabela->fetchRow("cpf like '%$cpf%'");
 		return $row!=null;
 	}
+	
+	public function PesquisarPorId($id){
+		$funcionarioTabela = new Funcionario();
+		$row = $funcionarioTabela->fetchRow("id_funcionario = $id");
+		if($row!=null){
+			return $funcionarioTabela->fetchRow("id_funcionario = $id")->toArray();
+		}else{
+			return !$row!=null;
+		}
+	}
 }

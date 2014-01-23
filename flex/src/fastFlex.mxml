@@ -36,8 +36,8 @@
 				 fontFamily="Verdana" fontSize="14" title="Avisos Importantes">
 			<s:RichText x="6" y="7" fontSize="13" fontStyle="normal" fontWeight="normal"
 						text="Atualizações:" textDecoration="none"/>
-			<s:RichText x="10" y="36" width="228" height="31" color="#403B3B" fontSize="12"
-						text="Cadastro de Produtos &#xd;Forma de Pagamento em Vendas&#xd;"/>
+			<s:RichText x="10" y="36" width="228" height="121" color="#403B3B" fontSize="12"
+						text="Cadastro de Produtos &#xd;Forma de Pagamento em Vendas.&#xd;&#xd;07/01 - Correção de pesquisa de Venda e pesquissa de Produto.&#xd;&#xd;09/01 - Correção de cadastramento de produtos.&#xd;"/>
 		</s:Panel>
 	</ns1:MDICanvas>  
 	<fx:Script source="scriptFastFlex.as" />

@@ -5,7 +5,23 @@ class ProdutoController extends ControllerBase{
 	}
 	
 	public function Salvar($produto){
+		
 		$produtoTabela = new Produto();
+		
+		$precoCustoNaoFormatado = $produto->preco_custo;
+		$precoVendaNaoFormatado = $produto->preco_venda;
+		
+		unset($produto->preco_custo);
+		unset($produto->preco_venda);
+		
+		$produto->preco_custo =  Zend_Locale_Format::getFloat($precoCustoNaoFormatado,
+                                       array('precision' => 2,
+                                             'locale' => 'de_AT')
+                                      );
+		$produto->preco_venda =  Zend_Locale_Format::getFloat($precoVendaNaoFormatado,
+                                       array('precision' => 2,
+                                             'locale' => 'de_AT')
+                                      );
 		
 		if ($produto->id_produto != null){
 			$id = $produto->id_produto;
@@ -34,17 +50,19 @@ class ProdutoController extends ControllerBase{
 	
 	public function ProdutoExiste($codigo){
 		$produtoTabela = new Produto();
-		$row = $produtoTabela->fetchRow("codigo_barras LIKE '%$codigo%'");
+		$row = $produtoTabela->fetchRow("codigo_barras = '$codigo'");
 		return $row!=null;
 	}
 	
 	public function PesquisarPorDescricao($descricao){
+		$descricaoCodificada = utf8_decode($descricao);
 		$produtoTabela = new Produto();
 		$row = $produtoTabela->fetchRow("descricao LIKE '%$descricao%'");
 		if($row!=null){
-			return $produtoTabela->fetchRow("descricao LIKE '%$descricao%'")->toArray();
+			return $produtoTabela->fetchAll($produtoTabela->select()->where("descricao LIKE '%$descricao%'"))->toArray();
 		}else{
-			return !$row!=null;
+			return "nao foi";
+			//return !$row!=null;
 		}
 	}
 	
@@ -57,4 +75,5 @@ class ProdutoController extends ControllerBase{
 			return !$row!=null;
 		}
 	}
+	
 }

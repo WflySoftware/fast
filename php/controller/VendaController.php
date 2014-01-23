@@ -48,10 +48,28 @@ public function Salvar($venda){
 	}
 	
 	public function PesquisarPorData($data){
-		
+		$vendaTabela = new Venda();
+		$row = $vendaTabela->fetchRow("data_venda = '$data'");
+		if($row!=null){
+			$select = $vendaTabela->select(Zend_Db_Table::SELECT_WITH_FROM_PART);
+			$select->setIntegrityCheck(false);
+			$select->join("funcionario","funcionario.id_funcionario = venda.funcionario_id_funcionario AND venda.data_venda = '$data'");
+			return $vendaTabela->fetchAll($select)->toArray();
+		}else{
+			return !$row!=null;
+		}
 	}
 	
 	public function PesquisarPorFuncionario($id_funcionario){
-		
+		$vendaTabela = new Venda();
+		$row = $vendaTabela->fetchRow("funcionario_id_funcionario = $id_funcionario");
+		if($row!=null){
+			$select = $vendaTabela->select(Zend_Db_Table::SELECT_WITH_FROM_PART);
+			$select->setIntegrityCheck(false);
+			$select->join("funcionario","funcionario.id_funcionario = $id_funcionario AND venda.funcionario_id_funcionario = $id_funcionario");
+			return $vendaTabela->fetchAll($select)->toArray();
+		}else{
+			return !$row!=null;
+		}
 	}
 }
