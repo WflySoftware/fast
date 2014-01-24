@@ -6,7 +6,6 @@ class ProdutoVendaController extends ControllerBase{
 	
 	public function Salvar($produtoVenda){
 		$produtoVendaTabela = new ProdutoVenda();
-		
 		//if (($produtoVenda->produto_id_produto != null) || ($produtoVenda->venda_id_venda != null)) {
 			//$produtoVendaTabela->update((array)$produtoVenda,"venda_id_venda = $produtoVenda->venda_id_venda");
 			
@@ -16,7 +15,7 @@ class ProdutoVendaController extends ControllerBase{
 		//}
 		$produtoVendaTabela->createRow((array)$produtoVenda)->save();
 		
-		return $produtoVendaTabela->fetchRow("venda_id_venda = $produtoVenda->venda_id_venda")->toArray();
+		return $produtoVendaTabela->fetchRow("produto_id_produto = $produtoVenda->produto_id_produto")->toArray();
 	}
 	
 	public function ListarTodos(){

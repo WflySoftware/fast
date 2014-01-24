@@ -91,7 +91,7 @@
 				Alert.yesLabel = "Dinheiro";
 				Alert.noLabel = "Cheque";
 				Alert.cancelLabel = "Cartão";
-
+				
 				Alert.show("Informe a Forma de Pagamento:", "Venda", Alert.YES|Alert.NO|Alert.CANCEL,this,alertFinalizarPagamento);
 			}
 			
@@ -135,12 +135,12 @@
 			protected function salvarVenda():void{
 				var ArrayValidators:Array = new Array();
 				ArrayValidators.push(dataValidacao);
-			
+				
 				var ValidationOk : Boolean= Validator.validateAll(ArrayValidators).length == 0;
 				if (ValidationOk)
 				{
-						VendaFormCadastro.valor_total = Number(visualizar_total.text);
-						VendaController.call("Salvar",finalizarResult,VendaFormCadastro);
+					VendaFormCadastro.valor_total = Number(visualizar_total.text);
+					VendaController.call("Salvar",finalizarResult,VendaFormCadastro);
 				}else{
 					botao_finalizar.enabled = ValidationOk;
 				}
@@ -167,7 +167,18 @@
 			}
 			
 			protected function adicionar(event:MouseEvent):void{
-				VendaController.call("Salvar",salvarResult,VendaFormCadastro);
+				ProdutoController.call("ProdutoExiste",produtoResult,input_adicionar.text);
+				
+			}
+			protected function produtoResult(event:ResultEvent){
+				var resultado:Boolean = event.result;
+				if(resultado != true){
+					Alert.show("Produto não existe");
+					input_adicionar.text = "";
+					input_quantidade.text = "";
+				}else{
+					VendaController.call("Salvar",salvarResult,VendaFormCadastro);
+				}
 			}
 			protected function adicionarResult(event:ResultEvent):void{
 				var dadosProduto:Produto = new Produto(event.result as Array);
@@ -220,5 +231,5 @@
 					  property="text" />
 		
 	</fx:Declarations>
-
+	
 </ns1:MDIWindow>
