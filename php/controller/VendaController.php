@@ -21,6 +21,56 @@ public function Salvar($venda){
 		}
 	}
 	
+	public function download( $path, $fileName = '' ){
+
+        if( $fileName == '' ){
+            $fileName = basename( $path );
+        }
+
+        header("Content-Type: application/force-download");
+        header("Content-type: application/octet-stream;");
+    	header("Content-Length: " . filesize( $path ) );
+    	header("Content-disposition: attachment; filename=" . $fileName );
+    	header("Pragma: no-cache");
+    	header("Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0");
+    	header("Expires: 0");
+    	readfile( $path );
+    	flush();
+    }
+    
+	public function ImprimirCupom($idVenda){
+		$vendaTabela = new Venda();
+		$item = new ProdutoVenda();
+		$dadosVenda = $vendaTabela->fetchRow($vendaTabela->select("id_venda = $idVenda"))->toArray();
+		$itens = $item->fetchAll($item->select()->where("venda_id_venda = $idVenda"))->toArray();
+		$cupom = fopen('../public_html/temp/ENT.txt','w+');
+		fwrite($cupom, "ECF.AbreCupom \r\n");
+		for($i=0; $i<count($itens); $i++){
+			fwrite($cupom, "ECF.VendeItem(".$itens[$i]['codigo'].",".$itens[$i]['descricao'].",NN,".$itens[$i]['quantidade'].",".$itens[$i]['preco_unitario'].",0,UN,%,D) \r\n");
+		}
+		fwrite($cupom,"ECF.SubtotalizaCupom(0) \r\n");
+		switch($dadosVenda['forma_pagamento']){
+			case 'Dinheiro':
+				$pagamento = 01;
+				break;
+			case 'Cheque':
+				$pagamento = 01;
+				break;
+			case 'Cartão de Débito':
+				$pagamento = 02;
+				break;
+			case 'Cartão de Crédito Parcelado':
+				$pagamento = 02;
+				break;
+			case 'Cartão de Crédito A vista':	
+				$pagamento = 02;	
+				break;	
+			default:
+				$pagamento = 01;	
+		}
+		fwrite($cupom,"ECF.EfetuaPagamento(0".$pagamento.",".$dadosVenda['valor_total'].") \r\n");
+		fwrite($cupom,"ECF.FechaCupom(Apice Creation Software) \r\n");	
+	}
 	public function ListarTodos(){
 		$vendaTabela = new Venda();
 		return $vendaTabela->fetchAll($vendaTabela->select())->toArray();
@@ -72,4 +122,5 @@ public function Salvar($venda){
 			return !$row!=null;
 		}
 	}
+	
 }

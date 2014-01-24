@@ -45,8 +45,6 @@
 			
 			import br.connection.Server;
 			
-			import flashx.textLayout.operations.PasteOperation;
-			
 			import mx.collections.ArrayCollection;
 			import mx.controls.Alert;
 			import mx.events.CloseEvent;
@@ -67,6 +65,8 @@
 			private var funcionarioArray:ArrayCollection;
 			[Bindable]
 			private var produtoVendaArray:ArrayCollection;
+			
+			var fileReference:FileReference = new FileReference();
 			
 			
 			protected function createComplete(event:FlexEvent):void{
@@ -151,12 +151,31 @@
 				input_data_venda.text = "";
 				input_quantidade.text = "";
 				visualizar_total.text = "";
+				VendaController.call("ImprimirCupom",imprimirResult,VendaFormCadastro.id_venda);
 				VendaFormCadastro	= new Venda();
 				ProdutoVendaFormCadastro = new ProdutoVenda();
 				produtoVendaArray = new ArrayCollection();
 				produtoVendaArray.refresh();
-				Alert.show("Venda Finalizada com Sucesso");
-				this.windowManager.remove(this);
+				Alert.yesLabel = "Sim";
+				Alert.noLabel = "Não";
+				Alert.show("Cupom:", "Imprimir Cupom", Alert.YES|Alert.NO,this,alertImprimirCupom);
+			}
+			
+			protected function alertImprimirCupom(event:CloseEvent):void{
+				if(event.detail == Alert.YES){
+					fileReference.download(new URLLoader("http://localhost/fast/public_html/temp/ENT.txt"));
+					
+					this.windowManager.remove(this);
+				}else if(event.detail == Alert.NO){
+					Alert.show("Venda Finalizada com Sucesso");
+					this.windowManager.remove(this);
+				}	
+			}
+			protected function downloadCupom(event:MouseEvent=null):void{
+				
+			}
+			
+			protected function imprimirResult(event:ResultEvent):void{
 			}
 			
 			protected function salvarResult(event:ResultEvent):void{
