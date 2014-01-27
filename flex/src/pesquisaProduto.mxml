@@ -7,18 +7,15 @@
 	<s:Panel y="10" height="168" title="Pesquisar Produto" fontSize="14" left="9" right="12">
 		
 		<s:Label x="10" y="49" text="Descrição:" id="label_descricao" />
-		<s:TextInput x="85" y="39" width="612" id="input_descricao" />
-		<!--
+		<s:TextInput x="85" y="39" width="612" id="input_descricao"  enabled="false"/>
 		<s:Label x="10" y="81" text="Código:" id="label_codigo"/>
 		<s:TextInput x="85" y="71" width="612" id="input_codigo" enabled="false" />
-		-->
 		
 		<mx:Button y="103" label="Limpar" id="botao_limpar" click="limparCampos()" icon="@Embed('imagens/limpar.gif')" x="517"/>
 		<mx:Button x="604" y="103" label="Pesquisar" id="botao_salvar" icon="@Embed('imagens/save.gif')" click="pesquisarProduto(event)"/>
-		<!--<s:CheckBox x="106" y="12" label="Descrição" id="chk_descricao" click="{input_descricao.enabled = true, input_codigo.enabled=false, chk_descricao.}"/>
+		<s:CheckBox x="106" y="12" label="Descrição" id="chk_descricao" click="{input_descricao.enabled = true, input_codigo.enabled=false, chk_codigo.selected=false}"/>
 		<s:Label x="10" y="17" text="Pesquisa Por:"/>
-		<s:CheckBox x="195" y="12" label="Código" id="chk_codigo" click="{input_codigo.enabled = true, input_descricao.enabled=false}"/>
-		-->
+		<s:CheckBox x="195" y="12" label="Código" id="chk_codigo" click="{input_codigo.enabled = true, input_descricao.enabled=false,chk_descricao.selected=false}"/>
 	</s:Panel>
 	<mx:DataGrid y="214" id="grid_produto" height="151" right="13" left="8">
 		<mx:columns>
@@ -56,13 +53,11 @@
 			
 			
 			protected function pesquisarProduto(event:MouseEvent):void{
-				//if((input_codigo.text = '') || (input_descricao.text = '')){
-					
-				//}else if((input_descricao.text = '')){
-				//	ProdutoController.call("PesquisarPorCodigo",pesquisaResult,input_codigo.text);		
-				//}else{
+				if((input_descricao.enabled == false)){
+					ProdutoController.call("PesquisarPorCodigo",pesquisaResult,input_codigo.text);		
+				}else{
 					ProdutoController.call("PesquisarPorDescricao",pesquisaResult,input_descricao.text);
-				//}
+				}
 			}
 			
 			protected function pesquisaResult(event:ResultEvent):void{
@@ -72,7 +67,7 @@
 			
 			protected function limparCampos():void{
 				input_descricao.text = "";
-				//input_codigo.text = "";
+				input_codigo.text = "";
 			}
 		]]>
 	</fx:Script>	

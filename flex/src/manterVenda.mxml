@@ -163,7 +163,7 @@
 			
 			protected function alertImprimirCupom(event:CloseEvent):void{
 				if(event.detail == Alert.YES){
-					fileReference.download(new URLLoader("http://localhost/fast/public_html/temp/ENT.txt"));
+					fileReference.download(new URLRequest("http://localhost/fast/public_html/temp/ENT.txt"));
 					
 					this.windowManager.remove(this);
 				}else if(event.detail == Alert.NO){

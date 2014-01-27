@@ -15,7 +15,7 @@ class ProdutoVendaController extends ControllerBase{
 		//}
 		$produtoVendaTabela->createRow((array)$produtoVenda)->save();
 		
-		return $produtoVendaTabela->fetchRow("produto_id_produto = $produtoVenda->produto_id_produto")->toArray();
+		return $produtoVendaTabela->fetchRow($produtoVendaTabela->select()->where("produto_id_produto = $produtoVenda->produto_id_produto AND venda_id_venda = $produtoVenda->venda_id_venda"))->toArray();
 	}
 	
 	public function ListarTodos(){

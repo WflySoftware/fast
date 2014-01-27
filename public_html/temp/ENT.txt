@@ -1,5 +1,6 @@
 ECF.AbreCupom 
-ECF.VendeItem(1234,Leite em Po,NN,11,179.85,0,UN,%,D) 
+ECF.VendeItem(1234,Leite em Po,NN,2,16.35,0,UN,%,D) 
+ECF.VendeItem(1234567,Feijão,NN,2,201.4,0,UN,%,D) 
 ECF.SubtotalizaCupom(0) 
 ECF.EfetuaPagamento(01,2000) 
 ECF.FechaCupom(Apice Creation Software) 
